@@ -1,5 +1,5 @@
 //Create variables here
-var dog, happyDog, database, feed,foodStock, dog_img, happy_img,fedTime, lastFed,foodObj;
+var dog, happyDog, database, feed,foodStock=0, dog_img, happy_img,fedTime, lastFed,foodObj;
 
 function preload()
 {
@@ -12,11 +12,11 @@ function preload()
 
 function setup() {
   createCanvas(1000, 400);
-foodObj = new food();
+  foodObj = new food();
 
   database = firebase.database();
-  foodStock = database.ref('Food');
-  foodStock.on("value",readStock);
+  foodStockRef = database.ref('Food');
+  foodStockRef.on("value",readStock);
 
   dog = createSprite(800,200,20,20);
   dog.addImage(dog_img);
@@ -34,58 +34,51 @@ foodObj = new food();
 
 
 function draw() {  
-background(46, 139, 87);
+    background(46, 139, 87);
 
-foodObj.display();
-/*if(keyDown === UP_ARROW){
-  writeStock(food);
-  dog.addImage(happy_img);
-}*/
+    foodObj.display();
 
-fedTime = database.ref('FeedTime');
-  fedTime.on("value",function(data){
-    lastFed=data.val();
-  });
+    fedTime = database.ref('FeedTime');
+      fedTime.on("value",function(data){
+        lastFed=data.val();
+      });
 
-  
+    fill(255,255,254);
+    textSize(15);
 
-fill(255,255,254);
-textSize(15);
-
-if(lastFed>=12){
-  text("Last Feed: "+ lastFed%12 + "PM",350,30);
+    if(lastFed>=12){
+      text("Last Feed: "+ lastFed%12 + "PM",350,30);
+    }
+    else if(lastFed == 0){
+      text("Last Feed :12 AM",350,30);
+    }
+    else{
+      text("Last Feed: "+ lastFed + "AM",350,30);
+    }
+    drawSprites();
 }
-else if(lastFed == 0){
-  text("Last Feed :12 AM",350,30);
-}
-else{
-  text("Last Feed: "+ lastFed + "AM",350,30);
-}
-  drawSprites();
-}
+
 function feedDog(){
-  dog.addImage(happyDog);
+  dog.addImage(happy_img);
 
   foodObj.updateFoodStock(foodObj.getfoodstock()-1);
   database.ref('/').update({
-Food:foodObj.getfoodstock(),
-FeedTime:hour()
+    Food:foodObj.getfoodstock(),
+    FeedTime:hour()
   })
 }
-function foodStock(){
-  foodS++;
-  database.ref('/').update({
-Food:foodS
-  })
-}
+
 function readStock(data) {
   foodS = data.val();
+  console.log(foodS)
   foodObj.updateFoodStock(foodS);
 }
+
 function addFoods(){
-  foodS++;
+  foodObj.updateFoodStock(foodObj.getfoodstock()+1);
+  console.log(foodStock)
   database.ref('/').update({
-    Food:foodS
+    Food:foodStock
   })
 }
 
